@@ -1,3 +1,7 @@
+## Aidan Payne
+## IFT 520
+## Python basic web server
+
 import socket
 import threading
 
@@ -9,6 +13,7 @@ class ThreadedWebServer(object):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.host, self.port))
 
+	##	Main process: Listen for incoming traffic on predefined socket, spawn thread to handle
     def listen(self):
         self.socket.listen(5)
         print("Serving HTTP on port",self.port,". . .")
@@ -17,26 +22,28 @@ class ThreadedWebServer(object):
             threading.Thread(target = self.listenToClient, args = (client, address)).start()
             ##self.listenToClient(client, address)
 
+	##	Given file, determine appropriate MIME type for HTTP OK
     def contentType(self,filepath):
         extension = filepath[filepath.index('.'):]
         ##print("extension: ",extension)
-        if extension == '.jpg' or extension == 'jpeg':
+        if extension == '.jpg' or extension == '.jpeg':
             contentType = 'image/jpeg'
         elif extension == '.gif':
             contentType = 'image/gif'
         elif extension == '.ico':
-            contentType = 'N'
+            contentType = 'image/vnd.microsoft.icon'
         elif extension == '.mp3':
             contentType = 'audio/mpeg'
         elif extension == '.mp4':
             contentType = 'video/mp4'
         return contentType
 
+	##	Handler for client HTTP requests
     def listenToClient(self, client, address):
         ##print("Starting thread")
         size = 1024
         while True:
-            ##try:
+            try:
                 data = client.recv(size)
                 ##print(data.decode())
                 if data:
@@ -63,18 +70,14 @@ class ThreadedWebServer(object):
                         client.sendall(response)
                         client.close()
                     else:
-                        ##print("sending response")
-                        response = """HTTP/1.0 200 OK\r\n\r\n<!DOCTYPE HTML><html><head><title>Python WebServer</title></head><body><h1>This is text, does it do what I want?</h1><audio controls><source src="radius.mp3" type="audio/mpeg"></audio><video width="480" height="480" controls><source src="paws.mp4" type="video/mp4"></video><img src="test.jpg"/><img src="test2.gif"/></body></html>\r\n"""
-                        ##print ("response: ",response)
-                        ##print("encoded response: ",response.encode())
+                        response = """HTTP/1.0 200 OK\r\n\r\n<!DOCTYPE HTML><html><head><title>Python WebServer</title></head><body><h1>Welcome to the landing page!</h1><audio controls><source src="08510.mp3" type="audio/mpeg"></audio><br><video width="480" height="480" controls><source src="paws.mp4" type="video/mp4"></video><br><img src="test.jpg"/><img src="test2.gif"/></body></html>\r\n"""
                         client.sendall(response.encode())
-                        ##print("data sent")
                         client.close()
                 else:
                     raise error('Client disconnected')
-            #except:
-                # client.close()
-                # return False
+            except:
+                 client.close()
+                 return False
 
 if __name__ == "__main__":
     port = 8888
